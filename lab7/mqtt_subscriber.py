@@ -59,7 +59,7 @@ class SignalSubscriber:
             else:
                 print(f"Ошибка подключения, код возврата {rc}")
 
-        client = mqtt_client.Client(CLIENT_ID)
+        client = mqtt_client.Client(mqtt_client.CallbackAPIVersion.V2, CLIENT_ID)
         client.on_connect = on_connect
         
         if USERNAME and PASSWORD:
