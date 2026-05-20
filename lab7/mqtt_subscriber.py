@@ -99,12 +99,23 @@ class SignalSubscriber:
                 print(f"Ошибка преобразования данных: {e}")
                 print(f"Полученные данные: {msg.payload.decode()}")
 
-        # Подписка с QoS уровнем 1 для гарантии доставки
-        result, mid = client.subscribe(TOPIC, qos=1)
-        if result[0] == 0:
-            print(f"Успешная подписка на топик: {TOPIC} (QoS=1)")
+        # Подписка с QoS уровнем 0 (стандартная доставка)
+        result = client.subscribe(TOPIC, qos=0)
+        
+        # Проверка результата подписки для разных версий paho-mqtt
+        # В версии 2.0+ возвращается объект MQTTErrorCode, в старых - кортеж
+        if hasattr(result, 'rc'):
+            # paho-mqtt >= 2.0
+            is_success = result.rc == 0
         else:
-            print(f"Ошибка подписки, код: {result[0]}")
+            # paho-mqtt < 2.0 (кортеж)
+            is_success = result[0] == 0
+            
+        if is_success:
+            print(f"Успешная подписка на топик: {TOPIC} (QoS=0)")
+        else:
+            error_code = result.rc if hasattr(result, 'rc') else result[0]
+            print(f"Ошибка подписки, код: {error_code}")
         client.on_message = on_message
         print(f"Ожидание сообщений в топике '{TOPIC}'...")
     
