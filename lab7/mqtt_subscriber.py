@@ -53,7 +53,7 @@ class SignalSubscriber:
     
     def connect_mqtt(self) -> mqtt_client:
         """Подключение к MQTT брокеру."""
-        def on_connect(client, userdata, flags, rc):
+        def on_connect(client, userdata, flags, rc, properties=None):
             if rc == 0:
                 print(f"Подключено к MQTT брокеру!")
                 print(f"Подписка на топик: {TOPIC}")
@@ -63,7 +63,7 @@ class SignalSubscriber:
         # Проверка версии paho-mqtt и создание клиента с соответствующим API
         # Для paho-mqtt >= 2.0 необходимо указывать callback_api_version
         if hasattr(mqtt, 'CallbackAPIVersion'):
-            client = mqtt_client.Client(callback_api_version=mqtt.CallbackAPIVersion.V2, client_id=CLIENT_ID)
+            client = mqtt_client.Client(callback_api_version=mqtt.CallbackAPIVersion.VERSION2, client_id=CLIENT_ID)
         else:
             # Для paho-mqtt < 2.0 (старая версия)
             client = mqtt_client.Client(client_id=CLIENT_ID)
@@ -92,14 +92,19 @@ class SignalSubscriber:
                 self.time_data.append(relative_time)
                 self.message_count += 1
                 
-                if self.message_count % 10 == 0 or self.message_count <= 5:
-                    print(f"[{self.message_count}] Получено: {value:.6f} (время: {relative_time:.2f}s)")
+                # Выводим каждое сообщение для отладки
+                print(f"[{self.message_count}] Получено: {value:.6f} (время: {relative_time:.2f}s)")
                     
             except ValueError as e:
                 print(f"Ошибка преобразования данных: {e}")
                 print(f"Полученные данные: {msg.payload.decode()}")
 
-        client.subscribe(TOPIC)
+        # Подписка с QoS уровнем 1 для гарантии доставки
+        result, mid = client.subscribe(TOPIC, qos=1)
+        if result[0] == 0:
+            print(f"Успешная подписка на топик: {TOPIC} (QoS=1)")
+        else:
+            print(f"Ошибка подписки, код: {result[0]}")
         client.on_message = on_message
         print(f"Ожидание сообщений в топике '{TOPIC}'...")
     

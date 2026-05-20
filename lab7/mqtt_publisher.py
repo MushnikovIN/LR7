@@ -20,6 +20,23 @@ USERNAME = ''  # можно указать при необходимости
 PASSWORD = ''  # можно указать при необходимости
 
 
+def on_connect(client, userdata, flags, rc, properties=None):
+    if rc == 0:
+        print("Подключено к MQTT брокеру!")
+    else:
+        print(f"Ошибка подключения, код возврата {rc}")
+
+# Проверка версии paho-mqtt и создание клиента с соответствующим API
+# Для paho-mqtt >= 2.0 необходимо указывать callback_api_version
+if hasattr(mqtt, 'CallbackAPIVersion'):
+    client = mqtt_client.Client(callback_api_version=mqtt.CallbackAPIVersion.VERSION2, client_id=CLIENT_ID)
+else:
+    # Для paho-mqtt < 2.0 (старая версия)
+    client = mqtt_client.Client(client_id=CLIENT_ID)
+
+client.on_connect = on_connect
+
+
 def connect_mqtt() -> mqtt_client:
     """
     Подключение к MQTT брокеру.
@@ -27,16 +44,10 @@ def connect_mqtt() -> mqtt_client:
     Returns:
         MQTT клиент
     """
-    def on_connect(client, userdata, flags, rc):
-        if rc == 0:
-            print("Подключено к MQTT брокеру!")
-        else:
-            print(f"Ошибка подключения, код возврата {rc}")
-
     # Проверка версии paho-mqtt и создание клиента с соответствующим API
     # Для paho-mqtt >= 2.0 необходимо указывать callback_api_version
     if hasattr(mqtt, 'CallbackAPIVersion'):
-        client = mqtt_client.Client(callback_api_version=mqtt.CallbackAPIVersion.V2, client_id=CLIENT_ID)
+        client = mqtt_client.Client(callback_api_version=mqtt.CallbackAPIVersion.VERSION2, client_id=CLIENT_ID)
     else:
         # Для paho-mqtt < 2.0 (старая версия)
         client = mqtt_client.Client(client_id=CLIENT_ID)
