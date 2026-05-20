@@ -32,7 +32,14 @@ def connect_mqtt() -> mqtt_client:
         else:
             print(f"Ошибка подключения, код возврата {rc}")
 
-    client = mqtt_client.Client(mqtt_client.CallbackAPIVersion.V2, CLIENT_ID)
+    # Проверка версии paho-mqtt и создание клиента с соответствующим API
+    try:
+        # Для paho-mqtt >= 2.0
+        client = mqtt_client.Client(mqtt_client.CallbackAPIVersion.V2, CLIENT_ID)
+    except AttributeError:
+        # Для paho-mqtt < 2.0 (старая версия)
+        client = mqtt_client.Client(CLIENT_ID)
+    
     client.on_connect = on_connect
     
     if USERNAME and PASSWORD:
