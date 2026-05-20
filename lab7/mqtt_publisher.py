@@ -8,6 +8,7 @@ import csv
 import time
 import random
 from paho.mqtt import client as mqtt_client
+import paho.mqtt.client as mqtt
 
 
 # Параметры MQTT
@@ -33,12 +34,12 @@ def connect_mqtt() -> mqtt_client:
             print(f"Ошибка подключения, код возврата {rc}")
 
     # Проверка версии paho-mqtt и создание клиента с соответствующим API
-    try:
-        # Для paho-mqtt >= 2.0
-        client = mqtt_client.Client(mqtt_client.CallbackAPIVersion.V2, CLIENT_ID)
-    except AttributeError:
+    # Для paho-mqtt >= 2.0 необходимо указывать callback_api_version
+    if hasattr(mqtt, 'CallbackAPIVersion'):
+        client = mqtt_client.Client(callback_api_version=mqtt.CallbackAPIVersion.V2, client_id=CLIENT_ID)
+    else:
         # Для paho-mqtt < 2.0 (старая версия)
-        client = mqtt_client.Client(CLIENT_ID)
+        client = mqtt_client.Client(client_id=CLIENT_ID)
     
     client.on_connect = on_connect
     
