@@ -26,8 +26,7 @@ def on_connect(client, userdata, flags, rc, properties=None):
     else:
         print(f"Ошибка подключения, код возврата {rc}")
 
-# Проверка версии paho-mqtt и создание клиента с соответствующим API
-# Для paho-mqtt >= 2.0 необходимо указывать callback_api_version
+
 if hasattr(mqtt, 'CallbackAPIVersion'):
     client = mqtt_client.Client(callback_api_version=mqtt.CallbackAPIVersion.VERSION2, client_id=CLIENT_ID)
 else:
@@ -44,8 +43,7 @@ def connect_mqtt() -> mqtt_client:
     Returns:
         MQTT клиент
     """
-    # Проверка версии paho-mqtt и создание клиента с соответствующим API
-    # Для paho-mqtt >= 2.0 необходимо указывать callback_api_version
+
     if hasattr(mqtt, 'CallbackAPIVersion'):
         client = mqtt_client.Client(callback_api_version=mqtt.CallbackAPIVersion.VERSION2, client_id=CLIENT_ID)
     else:
